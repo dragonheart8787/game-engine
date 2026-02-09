@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    {"id": "shape_1", "type": "Shape", "params": {"shape": "circle", "radius": 1.0}},
+    {"id": "path_1", "type": "Path", "params": {"mode": "forward", "distance": 5.0}},
+    {"id": "constraint_1", "type": "Constraint", "params": {"cooldown": 1.0}},
+    {"id": "spawn_1", "type": "Spawn", "params": {"vfx": "trail"}},
+    {"id": "affect_1", "type": "Affect", "params": {"damage": 10}},
+    {"id": "cost_1", "type": "Cost", "params": {"mana": 5}},
+    {"id": "cooldown_1", "type": "Cooldown", "params": {"seconds": 0.5}},
+    {"id": "interact_1", "type": "Interact", "params": {"type": "hit"}}
+  ],
+  "edges": [
+    {"from": "shape_1", "to": "path_1"},
+    {"from": "path_1", "to": "spawn_1"},
+    {"from": "spawn_1", "to": "affect_1"}
+  ]
+}

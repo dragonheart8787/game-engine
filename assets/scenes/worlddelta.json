@@ -1,0 +1,5 @@
+[
+  {"op": "set", "path": "/cityState/alerts", "value": 1},
+  {"op": "inc", "path": "/cityState/powerLevel", "value": 1},
+  {"op": "set", "path": "/eventFlags/tutorialComplete", "value": true}
+]

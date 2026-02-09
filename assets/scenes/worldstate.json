@@ -1,0 +1,30 @@
+{
+  "seed": 1337,
+  "regions": [
+    {
+      "id": "core",
+      "biomeType": "city",
+      "controlFaction": "neutral",
+      "dangerLevel": 2,
+      "weatherProfile": "clear"
+    }
+  ],
+  "cityState": {
+    "powerLevel": 3,
+    "lockdown": false,
+    "destruction": 0,
+    "alerts": 0
+  },
+  "characters": [
+    {
+      "id": "hero",
+      "alive": true,
+      "faction": "player",
+      "trust": {"hero": 1.0},
+      "flags": {"met": true}
+    }
+  ],
+  "eventFlags": {
+    "tutorialComplete": false
+  }
+}

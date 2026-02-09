@@ -5,31 +5,32 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG 0.9.9.8
+)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 find_package(SDL2 CONFIG QUIET)
 if (NOT SDL2_FOUND)
-    find_package(SDL2 REQUIRED)
+  find_package(SDL2 REQUIRED)
 endif()
 
-add_executable(game_engine
-    src/main.cpp
-    src/engine/Components.h
-    src/engine/Engine.cpp
-    src/engine/Engine.h
-    src/engine/Input.cpp
-    src/engine/Input.h
-    src/engine/Renderer.cpp
-    src/engine/Renderer.h
-    src/engine/Time.cpp
-    src/engine/Time.h
-    src/engine/World.cpp
-    src/engine/World.h
-)
+find_package(OpenGL REQUIRED COMPONENTS GLES3)
 
-if (TARGET SDL2::SDL2)
-    target_link_libraries(game_engine PRIVATE SDL2::SDL2)
-else()
-    target_include_directories(game_engine PRIVATE ${SDL2_INCLUDE_DIRS} src)
-    target_link_libraries(game_engine PRIVATE ${SDL2_LIBRARIES})
-endif()
+enable_testing()
 
-target_include_directories(game_engine PRIVATE src)
+add_subdirectory(engine)
+add_subdirectory(apps/demo_thirdperson)
+add_subdirectory(tools/asset_packer)
+add_subdirectory(tests/worldstate_tests)

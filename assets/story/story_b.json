@@ -1,0 +1,19 @@
+{
+  "storyId": "interlude_b",
+  "mode": "B",
+  "overrideType": "Partial",
+  "entryConditions": {"eventFlags/tutorialComplete": true},
+  "beats": [
+    {
+      "cameraPlan": "combat_focus",
+      "controlMode": "Guide",
+      "objective": "Defeat the scout",
+      "triggers": {"onAbility": "ability_basic"},
+      "failSoft": "retry"
+    }
+  ],
+  "constraints": {"exposure": "low"},
+  "worldDeltaOut": [
+    {"op": "inc", "path": "/cityState/alerts", "value": 1}
+  ]
+}

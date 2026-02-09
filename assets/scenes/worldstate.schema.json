@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["seed", "regions", "cityState", "characters", "eventFlags"],
+  "properties": {
+    "seed": {"type": "integer"},
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "biomeType", "controlFaction", "dangerLevel", "weatherProfile"],
+        "properties": {
+          "id": {"type": "string"},
+          "biomeType": {"type": "string"},
+          "controlFaction": {"type": "string"},
+          "dangerLevel": {"type": "integer"},
+          "weatherProfile": {"type": "string"}
+        }
+      }
+    },
+    "cityState": {
+      "type": "object",
+      "required": ["powerLevel", "lockdown", "destruction", "alerts"],
+      "properties": {
+        "powerLevel": {"type": "integer"},
+        "lockdown": {"type": "boolean"},
+        "destruction": {"type": "integer"},
+        "alerts": {"type": "integer"}
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "alive", "faction", "trust", "flags"],
+        "properties": {
+          "id": {"type": "string"},
+          "alive": {"type": "boolean"},
+          "faction": {"type": "string"},
+          "trust": {"type": "object"},
+          "flags": {"type": "object"}
+        }
+      }
+    },
+    "eventFlags": {"type": "object"}
+  }
+}

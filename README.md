@@ -1,89 +1,84 @@
 # game-engine
 
-這個專案已經開始實作「可執行的引擎核心」，目前包含遊戲迴圈、輸入、時間、簡易 ECS-lite 世界、以及可見的渲染輸出（移動方塊）。
+這個 repo 是 12 週專用引擎骨架計畫的起始版，遵守指定的模組邊界與資料格式。
+目前提供可編譯的 Demo（第三人稱移動 + 場景渲染）與最小的世界狀態/能力/故事系統骨架。
 
-## ✅ 目前已具備（可用基礎）
+## ✅ 已完成
 
-- 遊戲迴圈 + 變動時間步進（Time）
-- 輸入系統（鍵盤 + Quit）
-- ECS-lite 世界（Entity + Transform + Velocity）
-- SDL2 渲染（清畫面 + 方塊渲染）
-- 可移動的 player entity（WASD / 方向鍵）
+- **SDL2 + OpenGL ES 3.0** 視窗與渲染管線（PC）
+- 第三人稱 Demo：角色移動 / 跳躍 / 衝刺
+- WorldState/WorldDelta JSON 解析與 Hash
+- AbilityGraph v0 解析 + 事件輸出
+- Story Director/Identity Override 最小 runtime
+- 工具與測試骨架：asset_packer stub、worldstate_tests
 
-## 🧱 專案結構
+> 選擇 OpenGL ES 3.0：符合跨 PC/Android 的同一條渲染 API 要求，降低平台分歧。
+
+## 🧱 目錄結構（嚴格版）
 
 ```
-src/
-  main.cpp
-  engine/
-    Components.h
-    Engine.h / Engine.cpp
-    Input.h / Input.cpp
-    Renderer.h / Renderer.cpp
-    Time.h / Time.cpp
-    World.h / World.cpp
+/engine
+  /core /math /ecs /world /render /vfx /input /audio /physics /ai /net /story /procgen /ability /tools /debug /platform
+/apps
+  /demo_thirdperson
+/tools
+  /asset_packer
+/tests
+  /worldstate_tests
+/assets
+  /scenes /abilities /story /shaders /models /textures /audio
+/scripts
+/docs
 ```
 
-## 🛠️ 建置與執行
+## 🛠️ 建置與執行（PC）
 
 ### 需求
 - CMake 3.16+
 - C++17 編譯器
 - SDL2
+- OpenGL ES 3.x dev 套件（Linux 下通常是 `libgles2-mesa-dev`）
 
-### Toolchain/SDL2 安裝參考
-
-**Ubuntu/Debian**
+### Ubuntu/Debian
 ```
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libsdl2-dev
+sudo apt-get install -y build-essential cmake libsdl2-dev libgles2-mesa-dev
 ```
 
-**macOS (Homebrew)**
+### macOS (Homebrew)
 ```
 brew install cmake sdl2
 ```
 
-**Windows (vcpkg)**
+### Windows (vcpkg)
 ```
 vcpkg install sdl2
 ```
-若使用 vcpkg，請在 CMake 指定 toolchain：
 ```
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>/scripts/buildsystems/vcpkg.cmake
+cmake --build build
 ```
 
-### 建置
-
+### Build
 ```
 cmake -S . -B build
 cmake --build build
 ```
 
-### 執行
-
+### Run Demo
 ```
-./build/game_engine
+./build/apps/demo_thirdperson/demo_thirdperson
 ```
 
-**操作方式**
-- 移動：WASD 或 方向鍵
-- 退出：視窗關閉
+## 🤖 Android (Stub)
 
-> 如果 SDL2 沒安裝，請先在你的系統上安裝對應套件。
+Android 目前提供 build stub 與抽象層，尚未完成完整 pipeline。
 
-## ✅ 下一步目標（必備措施）
+## ✅ 下一步（必備措施）
 
-1. 加入 `Camera` / `Transform` 階層
-2. 加入簡單 `AssetManager`（texture / mesh / shader）
-3. 加入 `Scene` 載入（JSON + hot reload）
-4. 加入最小碰撞（AABB / sphere）
-5. 做出第一個可玩的房間 + 互動物件
+1. 完成 WorldState deterministic replay + input recording/replay
+2. 實作 AbilityGraph 對 VFX/Combat 的最小橋接
+3. Story beats 驗證與 WorldDelta 產出
+4. 場景 JSON hot reload 與 shader reload pipeline
 
-## 🧭 核心方向（避免失控）
-
-任何功能如果不能在 2 週內增加可玩的內容，就不做。
-
----
-
-想繼續擴展的話，請提供你遊戲的 **類型 / 平台 / 核心玩法**，我可以直接幫你制定下一個實作階段。
+更多規格細節請見 `docs/ARCH_SPEC.md`。
