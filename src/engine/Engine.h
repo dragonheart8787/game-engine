@@ -1,9 +1,11 @@
 #pragma once
 
 #include <SDL.h>
-#include <cstdint>
 
+#include "engine/Input.h"
 #include "engine/Renderer.h"
+#include "engine/Time.h"
+#include "engine/World.h"
 
 class Engine {
 public:
@@ -13,11 +15,15 @@ public:
 
 private:
     void processInput();
-    void update(float deltaSeconds);
+    void update();
     void render();
+    void clampToWindow(Transform& transform);
 
     bool isRunning_ = false;
     SDL_Window* window_ = nullptr;
     Renderer renderer_;
-    std::uint64_t lastCounter_ = 0;
+    Input input_;
+    Time time_;
+    World world_;
+    Entity player_;
 };

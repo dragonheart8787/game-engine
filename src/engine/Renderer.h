@@ -2,10 +2,13 @@
 
 #include <SDL.h>
 
+struct Transform;
+
 class Renderer {
 public:
     bool initialize(SDL_Window* window);
     void beginFrame();
+    void drawRect(const Transform& transform, SDL_Color color);
     void endFrame();
     void shutdown();
 

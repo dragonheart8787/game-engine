@@ -1,12 +1,14 @@
 # game-engine
 
-這個專案已經正式開始「可執行」的引擎骨架實作，目標是能夠快速跑起視窗、輸入、遊戲迴圈與基本渲染。
+這個專案已經開始實作「可執行的引擎核心」，目前包含遊戲迴圈、輸入、時間、簡易 ECS-lite 世界、以及可見的渲染輸出（移動方塊）。
 
-## ✅ 目前已具備
+## ✅ 目前已具備（可用基礎）
 
-- 基本遊戲迴圈與時間步進
-- 視窗建立與輸入事件處理
-- SDL2 渲染器與每幀清畫面
+- 遊戲迴圈 + 變動時間步進（Time）
+- 輸入系統（鍵盤 + Quit）
+- ECS-lite 世界（Entity + Transform + Velocity）
+- SDL2 渲染（清畫面 + 方塊渲染）
+- 可移動的 player entity（WASD / 方向鍵）
 
 ## 🧱 專案結構
 
@@ -14,8 +16,12 @@
 src/
   main.cpp
   engine/
+    Components.h
     Engine.h / Engine.cpp
+    Input.h / Input.cpp
     Renderer.h / Renderer.cpp
+    Time.h / Time.cpp
+    World.h / World.cpp
 ```
 
 ## 🛠️ 建置與執行
@@ -38,14 +44,19 @@ cmake --build build
 ./build/game_engine
 ```
 
+**操作方式**
+- 移動：WASD 或 方向鍵
+- 退出：視窗關閉
+
 > 如果 SDL2 沒安裝，請先在你的系統上安裝對應套件。
 
-## ✅ 下一步目標（可落地）
+## ✅ 下一步目標（必備措施）
 
-1. 加入基本 `Transform` 與 `Camera`
-2. 加入簡單 mesh 資源與 shader 管理
-3. 放入一個可移動的 player controller
-4. 做出「第一個可玩房間」
+1. 加入 `Camera` / `Transform` 階層
+2. 加入簡單 `AssetManager`（texture / mesh / shader）
+3. 加入 `Scene` 載入（JSON + hot reload）
+4. 加入最小碰撞（AABB / sphere）
+5. 做出第一個可玩的房間 + 互動物件
 
 ## 🧭 核心方向（避免失控）
 

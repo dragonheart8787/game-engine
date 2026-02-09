@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "engine/Components.h"
+
 bool Renderer::initialize(SDL_Window* window) {
     renderer_ = SDL_CreateRenderer(
         window,
@@ -20,6 +22,17 @@ bool Renderer::initialize(SDL_Window* window) {
 void Renderer::beginFrame() {
     SDL_SetRenderDrawColor(renderer_, 10, 12, 20, 255);
     SDL_RenderClear(renderer_);
+}
+
+void Renderer::drawRect(const Transform& transform, SDL_Color color) {
+    SDL_Rect rect{
+        static_cast<int>(transform.x),
+        static_cast<int>(transform.y),
+        static_cast<int>(transform.width),
+        static_cast<int>(transform.height)
+    };
+    SDL_SetRenderDrawColor(renderer_, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(renderer_, &rect);
 }
 
 void Renderer::endFrame() {
