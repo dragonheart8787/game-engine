@@ -31,6 +31,28 @@ src/
 - C++17 編譯器
 - SDL2
 
+### Toolchain/SDL2 安裝參考
+
+**Ubuntu/Debian**
+```
+sudo apt-get update
+sudo apt-get install -y build-essential cmake libsdl2-dev
+```
+
+**macOS (Homebrew)**
+```
+brew install cmake sdl2
+```
+
+**Windows (vcpkg)**
+```
+vcpkg install sdl2
+```
+若使用 vcpkg，請在 CMake 指定 toolchain：
+```
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>/scripts/buildsystems/vcpkg.cmake
+```
+
 ### 建置
 
 ```

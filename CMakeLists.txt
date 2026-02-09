@@ -5,7 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(SDL2 REQUIRED)
+find_package(SDL2 CONFIG QUIET)
+if (NOT SDL2_FOUND)
+    find_package(SDL2 REQUIRED)
+endif()
 
 add_executable(game_engine
     src/main.cpp
@@ -22,5 +25,11 @@ add_executable(game_engine
     src/engine/World.h
 )
 
-target_include_directories(game_engine PRIVATE ${SDL2_INCLUDE_DIRS} src)
-target_link_libraries(game_engine PRIVATE ${SDL2_LIBRARIES})
+if (TARGET SDL2::SDL2)
+    target_link_libraries(game_engine PRIVATE SDL2::SDL2)
+else()
+    target_include_directories(game_engine PRIVATE ${SDL2_INCLUDE_DIRS} src)
+    target_link_libraries(game_engine PRIVATE ${SDL2_LIBRARIES})
+endif()
+
+target_include_directories(game_engine PRIVATE src)
