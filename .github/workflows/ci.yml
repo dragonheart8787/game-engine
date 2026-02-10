@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libsdl2-dev libgles2-mesa-dev libglm-dev nlohmann-json3-dev
+      - name: SDL isolation rule
+        run: ./scripts/check_sdl_isolation.sh
+      - name: Vendor deps completeness
+        run: ./scripts/check_vendor_deps.sh
+      - name: Configure (offline/vendor mode)
+        run: cmake -S . -B build -DENGINE_VENDOR_DEPS=ON
+      - name: Build
+        run: cmake --build build
+      - name: Validate assets
+        run: ./build/tools/validate_assets/validate_assets
+      - name: Test
+        run: ctest --test-dir build
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (offline/vendor mode)
+        run: cmake -S . -B build -DENGINE_VENDOR_DEPS=ON
+      - name: Build
+        run: cmake --build build --config Release
+
+  android-build-stub:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_NDK_VERSION: r26d
+    steps:
+      - uses: actions/checkout@v4
+      - name: Android stub build-only
+        run: ./scripts/build_android_stub.sh

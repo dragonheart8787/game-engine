@@ -1,0 +1,19 @@
+{
+  "storyId": "chapter_a",
+  "mode": "A",
+  "overrideType": "Full",
+  "entryConditions": {"eventFlags/tutorialComplete": false},
+  "beats": [
+    {
+      "cameraPlan": "intro_pan",
+      "controlMode": "Hold",
+      "objective": "Reach the gate",
+      "triggers": {"onEnter": "gate"},
+      "failSoft": "skip"
+    }
+  ],
+  "constraints": {"ability": "limited"},
+  "worldDeltaOut": [
+    {"op": "set", "path": "/eventFlags/tutorialComplete", "value": true}
+  ]
+}
