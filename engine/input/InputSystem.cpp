@@ -19,14 +19,34 @@ void InputSystem::initialize() {
   bindings_[Action::ToggleDebug] = engine::core::KeyCode::L;
 }
 
-void InputSystem::beginFrame() {
-}
+void InputSystem::beginFrame() {}
 
 void InputSystem::handleEvent(const engine::core::PlatformEvent& event) {
   if (event.type == engine::core::PlatformEventType::KeyDown) {
     keyDown_[event.key] = true;
   } else if (event.type == engine::core::PlatformEventType::KeyUp) {
     keyDown_[event.key] = false;
+  } else if (event.type == engine::core::PlatformEventType::TouchDown ||
+             event.type == engine::core::PlatformEventType::TouchMove) {
+    // Android stub mapping: left half joystick for move, right half for look/cast.
+    if (event.touchX < 0.5f) {
+      keyDown_[engine::core::KeyCode::W] = event.touchY < 0.4f;
+      keyDown_[engine::core::KeyCode::S] = event.touchY > 0.6f;
+      keyDown_[engine::core::KeyCode::A] = event.touchX < 0.25f;
+      keyDown_[engine::core::KeyCode::D] = event.touchX > 0.25f;
+    } else {
+      keyDown_[engine::core::KeyCode::J] = (event.touchX > 0.8f && event.touchY > 0.7f);
+      keyDown_[engine::core::KeyCode::Space] = (event.touchX > 0.8f && event.touchY < 0.3f);
+      keyDown_[engine::core::KeyCode::Shift] = (event.touchX > 0.6f && event.touchX < 0.8f);
+    }
+  } else if (event.type == engine::core::PlatformEventType::TouchUp) {
+    keyDown_[engine::core::KeyCode::W] = false;
+    keyDown_[engine::core::KeyCode::A] = false;
+    keyDown_[engine::core::KeyCode::S] = false;
+    keyDown_[engine::core::KeyCode::D] = false;
+    keyDown_[engine::core::KeyCode::J] = false;
+    keyDown_[engine::core::KeyCode::Space] = false;
+    keyDown_[engine::core::KeyCode::Shift] = false;
   }
 }
 

@@ -53,6 +53,7 @@ void App::run() {
     while (accumulator_ >= fixedStep_) {
       if (fixedUpdate_) {
         fixedUpdate_(fixedStep_);
+        ++fixedTickCount_;
       }
       accumulator_ -= fixedStep_;
     }

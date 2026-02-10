@@ -1,9 +1,11 @@
 #include "apps/demo_thirdperson/DemoGame.h"
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <nlohmann/json.hpp>
 
 namespace apps::demo_thirdperson {
 
@@ -35,6 +37,7 @@ bool DemoGame::initialize(engine::core::App& app) {
 
   engine::procgen::WorldGenerator generator;
   worldState_ = generator.generate(1337u);
+  recording_.seed = worldState_.getSeed();
 
   return true;
 }
@@ -67,6 +70,15 @@ void DemoGame::update(float deltaSeconds) {
   }
   abilityRuntime_.clearEvents();
   updateStory();
+
+  engine::debug::DebugSnapshot snapshot;
+  snapshot.fixedTick = app_ ? app_->fixedTickCount() : 0;
+  snapshot.worldHash = engine::world::WorldHasher::hash(worldState_);
+  snapshot.deltaCount = worldState_.toJson().value("eventFlags", nlohmann::ordered_json::object()).size();
+  snapshot.storyBeat = "runtime";
+  snapshot.controlMask = directorA_.controlMask().allowMove ? "move:on" : "move:off";
+  debug_.setSnapshot(snapshot);
+
   renderer_.hotReload();
 }
 
@@ -164,22 +176,18 @@ void DemoGame::updateStory() {
   if (triggerStoryA_) {
     if (directorA_.checkEntryConditions(worldState_.rawJson())) {
       engine::world::WorldDelta delta = directorA_.runBeats();
-      auto json = worldState_.toJson();
-      const auto result = delta.apply(json);
-      if (result.ok) {
-        worldState_.setJson(json);
-      }
+      const auto result = engine::world::WorldStore::applyDeltaWithJournal(
+          worldState_, delta, "assets/scenes/world_delta_log.jsonl");
+      (void)result;
     }
     triggerStoryA_ = false;
   }
   if (triggerStoryB_) {
     if (directorB_.checkEntryConditions(worldState_.rawJson())) {
       engine::world::WorldDelta delta = directorB_.runBeats();
-      auto json = worldState_.toJson();
-      const auto result = delta.apply(json);
-      if (result.ok) {
-        worldState_.setJson(json);
-      }
+      const auto result = engine::world::WorldStore::applyDeltaWithJournal(
+          worldState_, delta, "assets/scenes/world_delta_log.jsonl");
+      (void)result;
     }
     triggerStoryB_ = false;
   }
@@ -194,17 +202,44 @@ void DemoGame::recordInput() {
   frame.jump = input_.isPressed(engine::input::Action::Jump);
   frame.dash = input_.isPressed(engine::input::Action::Dash);
   frame.ability1 = input_.isPressed(engine::input::Action::CastAbility1);
-  recordedInputs_.push_back(frame);
+  recording_.frames.push_back(frame);
+  if (recording_.frames.size() % 300 == 0) {
+    saveRecording("assets/scenes/input_recording.json");
+  }
 }
 
 void DemoGame::replayInput() {
-  if (replayIndex_ >= recordedInputs_.size()) {
+  if (replayIndex_ >= recording_.frames.size()) {
     replaying_ = false;
     replayIndex_ = 0;
     return;
   }
-  const InputFrame& frame = recordedInputs_[replayIndex_++];
+  const InputFrame& frame = recording_.frames[replayIndex_++];
   (void)frame;
 }
 
+bool DemoGame::saveRecording(const std::string& path) const {
+  nlohmann::ordered_json out;
+  out["version"] = recording_.version;
+  out["seed"] = recording_.seed;
+  out["frames"] = nlohmann::ordered_json::array();
+  for (const auto& frame : recording_.frames) {
+    out["frames"].push_back({
+        {"forward", frame.forward},
+        {"backward", frame.backward},
+        {"left", frame.left},
+        {"right", frame.right},
+        {"jump", frame.jump},
+        {"dash", frame.dash},
+        {"ability1", frame.ability1}
+    });
+  }
+
+  std::ofstream file(path);
+  if (!file.is_open()) {
+    return false;
+  }
+  file << out.dump(2);
+  return true;
+}
 }  // namespace apps::demo_thirdperson

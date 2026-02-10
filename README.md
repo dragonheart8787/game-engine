@@ -94,3 +94,13 @@ Android 目前提供 build stub 與抽象層，尚未完成完整 pipeline。
 4. 場景 JSON hot reload 與 shader reload pipeline
 
 更多規格細節請見 `docs/ARCH_SPEC.md`。
+
+## 🔒 Determinism Guardrails（新增）
+- 固定 tick 計時：遊戲邏輯使用 fixed update。
+- RNG 單一入口：新增 `engine::math::DeterministicRng`（seed + streamId）。
+- Input recording 為 versioned 格式（`version` + `seed` + `frames`）。
+- WorldDelta 套用加入 validation / journaling / rollback。
+
+## 🧪 額外工具
+- `tools/validate_assets`：檢查 Ability/Story JSON 基本一致性與引用。
+- `scripts/check_sdl_isolation.sh`：檢查 SDL include 只存在於 platform 模組。

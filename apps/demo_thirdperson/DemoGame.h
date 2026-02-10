@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "engine/ability/AbilityRuntime.h"
@@ -16,6 +17,7 @@
 #include "engine/world/WorldDelta.h"
 #include "engine/world/WorldHasher.h"
 #include "engine/world/WorldState.h"
+#include "engine/world/WorldStore.h"
 
 namespace apps::demo_thirdperson {
 
@@ -27,6 +29,12 @@ struct InputFrame {
   bool jump = false;
   bool dash = false;
   bool ability1 = false;
+};
+
+struct InputRecording {
+  int version = 1;
+  std::uint64_t seed = 0;
+  std::vector<InputFrame> frames;
 };
 
 class DemoGame {
@@ -46,6 +54,7 @@ private:
   void updateStory();
   void recordInput();
   void replayInput();
+  bool saveRecording(const std::string& path) const;
 
   engine::core::App* app_ = nullptr;
   engine::input::InputSystem input_{};
@@ -64,7 +73,7 @@ private:
   engine::math::Vec3 playerVelocity_{0.0f, 0.0f, 0.0f};
   bool onGround_ = true;
 
-  std::vector<InputFrame> recordedInputs_;
+  InputRecording recording_{};
   bool replaying_ = false;
   std::size_t replayIndex_ = 0;
   bool triggerStoryA_ = false;

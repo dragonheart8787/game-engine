@@ -20,6 +20,7 @@ target_compile_definitions(engine_core PUBLIC SDL_MAIN_HANDLED)
 add_library(engine_math
   math/Math.cpp
   math/Random.cpp
+  math/DeterministicRng.cpp
 )
 
 target_include_directories(engine_math PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

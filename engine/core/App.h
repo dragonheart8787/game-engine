@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 
 #include "engine/core/Platform.h"
@@ -28,6 +29,7 @@ public:
 
   void requestQuit() { platform_.requestQuit(); }
   float timeSeconds() const { return platform_.timeSeconds(); }
+  std::uint64_t fixedTickCount() const { return fixedTickCount_; }
   Platform& platform() { return platform_; }
 
 private:
@@ -42,6 +44,7 @@ private:
   bool running_ = false;
   float fixedStep_ = 1.0f / 60.0f;
   float accumulator_ = 0.0f;
+  std::uint64_t fixedTickCount_ = 0;
 };
 
 }  // namespace engine::core

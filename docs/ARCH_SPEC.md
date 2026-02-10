@@ -157,3 +157,10 @@ Game::Render() → Renderer::EndFrame() → Platform::Present()
   - Linux build
   - Android build（可只 build 不跑）
 - 格式化：clang-format + 可選 pre-commit hook
+
+## 補強項（已落地）
+- Determinism guardrails：固定 tick、DeterministicRng、versioned input recording。
+- WorldDelta：validation + transactional apply + journaling（`world_delta_log`）。
+- Android input stub：觸控事件映射進同一套 Action system。
+- CI 規則：SDL include isolation check。
+- 資產驗證工具：`tools/validate_assets`。

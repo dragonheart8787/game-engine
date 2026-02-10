@@ -128,6 +128,24 @@ void Platform::pollEvents() {
           events_.push_back(ev);
         }
         break;
+            case SDL_FINGERDOWN:
+        ev.type = PlatformEventType::TouchDown;
+        ev.touchX = event.tfinger.x;
+        ev.touchY = event.tfinger.y;
+        events_.push_back(ev);
+        break;
+      case SDL_FINGERMOTION:
+        ev.type = PlatformEventType::TouchMove;
+        ev.touchX = event.tfinger.x;
+        ev.touchY = event.tfinger.y;
+        events_.push_back(ev);
+        break;
+      case SDL_FINGERUP:
+        ev.type = PlatformEventType::TouchUp;
+        ev.touchX = event.tfinger.x;
+        ev.touchY = event.tfinger.y;
+        events_.push_back(ev);
+        break;
       default:
         break;
     }

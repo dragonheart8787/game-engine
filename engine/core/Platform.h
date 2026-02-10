@@ -39,7 +39,10 @@ enum class PlatformEventType {
   KeyUp,
   WindowResize,
   FocusGained,
-  FocusLost
+  FocusLost,
+  TouchDown,
+  TouchMove,
+  TouchUp
 };
 
 struct PlatformEvent {
@@ -47,6 +50,8 @@ struct PlatformEvent {
   KeyCode key = KeyCode::Unknown;
   int width = 0;
   int height = 0;
+  float touchX = 0.0f;
+  float touchY = 0.0f;
 };
 
 class Platform {

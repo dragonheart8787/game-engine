@@ -1,4 +1,5 @@
 #include <cassert>
+#include <filesystem>
 #include <iostream>
 
 #include <nlohmann/json.hpp>
@@ -6,6 +7,7 @@
 #include "engine/world/WorldDelta.h"
 #include "engine/world/WorldHasher.h"
 #include "engine/world/WorldState.h"
+#include "engine/world/WorldStore.h"
 
 int main() {
   nlohmann::ordered_json stateJson = {
@@ -38,7 +40,6 @@ int main() {
   state.setJson(json);
 
   const std::uint64_t hashB = engine::world::WorldHasher::hash(state);
-
   assert(hashA != hashB);
 
   // Deterministic hash: quantized floats should produce same hash.
@@ -73,6 +74,21 @@ int main() {
   assert(merged);
   const bool rejected = delta.merge(delta2, engine::world::WorldDelta::ConflictPolicy::RejectOnConflict);
   assert(!rejected);
+
+  // Validation + rollback + journal.
+  const std::string journalPath = "tests/worldstate_tests/world_delta_log.jsonl";
+  std::filesystem::remove(journalPath);
+  nlohmann::ordered_json badDeltaJson = nlohmann::ordered_json::array({
+      {{"op", "inc"}, {"path", "/cityState/unknown"}, {"value", 2}}
+  });
+  engine::world::WorldDelta badDelta = engine::world::WorldDelta::fromJson(badDeltaJson);
+  engine::world::WorldState beforeApply = engine::world::WorldState::fromJson(stateJson);
+  const std::uint64_t beforeHash = engine::world::WorldHasher::hash(beforeApply);
+  const auto applyResult = engine::world::WorldStore::applyDeltaWithJournal(beforeApply, badDelta, journalPath);
+  assert(!applyResult.ok);
+  assert(beforeHash == engine::world::WorldHasher::hash(beforeApply));
+  assert(std::filesystem::exists(journalPath));
+
   std::cout << "Worldstate tests passed" << '\n';
   return 0;
 }
