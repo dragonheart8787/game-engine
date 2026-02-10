@@ -19,28 +19,43 @@ if (NOT nlohmann_json_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/third_party/json/CMa
   add_subdirectory(third_party/json)
 endif()
 
+set(_missing_vendor_deps "")
 if (NOT TARGET glm::glm)
-  if (ENGINE_VENDOR_DEPS)
-    message(FATAL_ERROR "glm not found. Provide system package or third_party/glm when ENGINE_VENDOR_DEPS=ON")
-  endif()
-  FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 0.9.9.8
-  )
-  FetchContent_MakeAvailable(glm)
+  list(APPEND _missing_vendor_deps "glm (expected: third_party/glm)")
+endif()
+if (NOT TARGET nlohmann_json::nlohmann_json)
+  list(APPEND _missing_vendor_deps "nlohmann_json (expected: third_party/json)")
 endif()
 
-if (NOT TARGET nlohmann_json::nlohmann_json)
-  if (ENGINE_VENDOR_DEPS)
-    message(FATAL_ERROR "nlohmann_json not found. Provide system package or third_party/json when ENGINE_VENDOR_DEPS=ON")
+if (ENGINE_VENDOR_DEPS)
+  if (_missing_vendor_deps)
+    string(JOIN ", " _missing_vendor_deps_text ${_missing_vendor_deps})
+    message(FATAL_ERROR
+      "ENGINE_VENDOR_DEPS=ON but required dependencies are missing: ${_missing_vendor_deps_text}\n"
+      "Fix options:\n"
+      "  1) git submodule update --init --recursive\n"
+      "  2) ./scripts/fetch_deps.sh --vendor-dir third_party --glm 0.9.9.8 --json v3.11.3\n"
+      "  3) (Windows) ./scripts/fetch_deps.ps1 -VendorDir third_party -Glm 0.9.9.8 -Json v3.11.3\n"
+      "  4) install system packages that provide glm + nlohmann_json config packages")
   endif()
-  FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
-  )
-  FetchContent_MakeAvailable(nlohmann_json)
+else()
+  if (NOT TARGET glm::glm)
+    FetchContent_Declare(
+      glm
+      GIT_REPOSITORY https://github.com/g-truc/glm.git
+      GIT_TAG 0.9.9.8
+    )
+    FetchContent_MakeAvailable(glm)
+  endif()
+
+  if (NOT TARGET nlohmann_json::nlohmann_json)
+    FetchContent_Declare(
+      nlohmann_json
+      GIT_REPOSITORY https://github.com/nlohmann/json.git
+      GIT_TAG v3.11.3
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+  endif()
 endif()
 
 find_package(SDL2 CONFIG QUIET)

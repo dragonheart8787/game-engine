@@ -48,6 +48,19 @@ sudo apt-get update
 sudo apt-get install -y build-essential cmake libsdl2-dev libgles2-mesa-dev libglm-dev nlohmann-json3-dev
 ```
 
+### Offline 依賴初始化（必做其一）
+```bash
+git submodule update --init --recursive
+```
+或：
+```bash
+./scripts/fetch_deps.sh --vendor-dir third_party --glm 0.9.9.8 --json v3.11.3
+```
+PowerShell：
+```powershell
+./scripts/fetch_deps.ps1 -VendorDir third_party -Glm 0.9.9.8 -Json v3.11.3
+```
+
 ### Build（離線模式）
 ```
 cmake -S . -B build -DENGINE_VENDOR_DEPS=ON
@@ -94,6 +107,7 @@ Platform::PollEvents → InputSystem::BeginFrame → Game::Update → Renderer::
 - `tools/validate_assets`：檢查 Ability/Story/WorldDelta 語義錯誤。
 - `tools/replay_diff`：輸出 replay 第一個 divergence tick。
 - `scripts/check_sdl_isolation.sh`：檢查 SDL include 只存在於 platform 模組。
+- `scripts/check_vendor_deps.sh`：檢查 offline 模式依賴是否完整。
 - `scripts/fetch_deps.sh`：可選線上抓 third_party 依賴。
 
 更多規格細節請見 `docs/ARCH_SPEC.md`。
