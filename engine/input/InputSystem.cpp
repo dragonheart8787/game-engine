@@ -28,6 +28,7 @@ void InputSystem::handleEvent(const engine::core::PlatformEvent& event) {
     keyDown_[event.key] = false;
   } else if (event.type == engine::core::PlatformEventType::TouchDown ||
              event.type == engine::core::PlatformEventType::TouchMove) {
+    touchState_[event.fingerId] = event.type;
     // Android stub mapping: left half joystick for move, right half for look/cast.
     if (event.touchX < 0.5f) {
       keyDown_[engine::core::KeyCode::W] = event.touchY < 0.4f;
@@ -40,6 +41,7 @@ void InputSystem::handleEvent(const engine::core::PlatformEvent& event) {
       keyDown_[engine::core::KeyCode::Shift] = (event.touchX > 0.6f && event.touchX < 0.8f);
     }
   } else if (event.type == engine::core::PlatformEventType::TouchUp) {
+    touchState_.erase(event.fingerId);
     keyDown_[engine::core::KeyCode::W] = false;
     keyDown_[engine::core::KeyCode::A] = false;
     keyDown_[engine::core::KeyCode::S] = false;

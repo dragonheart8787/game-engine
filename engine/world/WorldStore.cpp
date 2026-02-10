@@ -1,6 +1,7 @@
 #include "engine/world/WorldStore.h"
 
 #include <fstream>
+#include <vector>
 
 namespace engine::world {
 
@@ -25,15 +26,58 @@ bool validateDeltaAgainstState(const nlohmann::ordered_json& stateJson, const Wo
   return true;
 }
 
-void appendJournal(const std::string& journalPath, const WorldDelta& delta, const std::string& status, const std::string& message) {
+std::uint64_t hashDelta(const WorldDelta& delta) {
+  const std::string payload = delta.toJson().dump();
+  std::uint64_t hash = 1469598103934665603ull;
+  for (const char c : payload) {
+    hash ^= static_cast<std::uint64_t>(c);
+    hash *= 1099511628211ull;
+  }
+  return hash;
+}
+
+void rotateJournalIfNeeded(const std::string& journalPath, std::size_t maxEntries) {
+  std::ifstream input(journalPath);
+  if (!input.is_open()) {
+    return;
+  }
+  std::vector<std::string> lines;
+  std::string line;
+  while (std::getline(input, line)) {
+    lines.push_back(line);
+  }
+  if (lines.size() <= maxEntries) {
+    return;
+  }
+  const std::size_t start = lines.size() - maxEntries;
+  std::ofstream output(journalPath, std::ios::trunc);
+  for (std::size_t i = start; i < lines.size(); ++i) {
+    output << lines[i] << "\n";
+  }
+}
+
+void appendJournal(
+    const std::string& journalPath,
+    const WorldDelta& delta,
+    const std::string& result,
+    const std::string& message,
+    const WorldStore::JournalContext& context) {
+  rotateJournalIfNeeded(journalPath, context.maxEntries);
+
   std::ofstream file(journalPath, std::ios::app);
   if (!file.is_open()) {
     return;
   }
   nlohmann::ordered_json entry = {
-      {"status", status},
-      {"message", message},
-      {"delta", delta.toJson()}
+      {"version", "journal_v1"},
+      {"seq", context.seq},
+      {"ts_fixedTick", context.tsFixedTick},
+      {"seed", context.seed},
+      {"storyId", context.storyId},
+      {"deltaHash", hashDelta(delta)},
+      {"deltaOps", delta.toJson()},
+      {"result", result},
+      {"message", message}
   };
   file << entry.dump() << "\n";
 }
@@ -58,22 +102,23 @@ bool WorldStore::saveToFile(const WorldState& state, const std::string& path) {
 WorldStore::ApplyDeltaResult WorldStore::applyDeltaWithJournal(
     WorldState& state,
     const WorldDelta& delta,
-    const std::string& journalPath) {
+    const std::string& journalPath,
+    const JournalContext& context) {
   auto staged = state.toJson();
   std::string validationError;
   if (!validateDeltaAgainstState(staged, delta, validationError)) {
-    appendJournal(journalPath, delta, "rejected", validationError);
+    appendJournal(journalPath, delta, "error", validationError, context);
     return {false, validationError};
   }
 
   const auto result = delta.apply(staged);
   if (!result.ok) {
-    appendJournal(journalPath, delta, "failed", result.error);
+    appendJournal(journalPath, delta, "error", result.error, context);
     return {false, result.error};
   }
 
   state.setJson(staged);
-  appendJournal(journalPath, delta, "committed", "ok");
+  appendJournal(journalPath, delta, "committed", "ok", context);
   return {true, ""};
 }
 

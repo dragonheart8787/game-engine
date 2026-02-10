@@ -10,7 +10,7 @@
 - WorldState/WorldDelta JSON 解析與 Hash
 - AbilityGraph v0 解析 + 事件輸出
 - Story Director/Identity Override 最小 runtime
-- 工具與測試骨架：asset_packer stub、worldstate_tests
+- 工具與測試骨架：asset_packer、validate_assets、replay_diff、worldstate_tests
 
 > 選擇 OpenGL ES 3.0：符合跨 PC/Android 的同一條渲染 API 要求，降低平台分歧。
 
@@ -22,13 +22,14 @@
 /apps
   /demo_thirdperson
 /tools
-  /asset_packer
+  /asset_packer /validate_assets /replay_diff
 /tests
   /worldstate_tests
 /assets
-  /scenes /abilities /story /shaders /models /textures /audio
+  /scenes /abilities /story /shaders /models /textures /audio /config
 /scripts
 /docs
+/third_party
 ```
 
 ## 🛠️ 建置與執行（PC）
@@ -38,30 +39,25 @@
 - C++17 編譯器
 - SDL2
 - OpenGL ES 3.x dev 套件（Linux 下通常是 `libgles2-mesa-dev`）
+- glm
+- nlohmann_json
 
-### Ubuntu/Debian
+### Ubuntu/Debian（離線友善）
 ```
 sudo apt-get update
-sudo apt-get install -y build-essential cmake libsdl2-dev libgles2-mesa-dev
+sudo apt-get install -y build-essential cmake libsdl2-dev libgles2-mesa-dev libglm-dev nlohmann-json3-dev
 ```
 
-### macOS (Homebrew)
+### Build（離線模式）
 ```
-brew install cmake sdl2
-```
-
-### Windows (vcpkg)
-```
-vcpkg install sdl2
-```
-```
-cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>/scripts/buildsystems/vcpkg.cmake
+cmake -S . -B build -DENGINE_VENDOR_DEPS=ON
 cmake --build build
+ctest --test-dir build
 ```
 
-### Build
+### Build（線上模式，允許 FetchContent）
 ```
-cmake -S . -B build
+cmake -S . -B build -DENGINE_VENDOR_DEPS=OFF
 cmake --build build
 ```
 
@@ -83,24 +79,21 @@ cmake --build build
 Platform::PollEvents → InputSystem::BeginFrame → Game::Update → Renderer::BeginFrame → Game::Render → Renderer::EndFrame → Platform::Present
 
 ## 🤖 Android (Stub)
+- Build-only stub（CI 不跑 runtime）
+- NDK 版本預設：`r26d`
+- 觸控映射設定檔：`assets/config/touch_mapping.json`
 
-Android 目前提供 build stub 與抽象層，尚未完成完整 pipeline。
-
-## ✅ 下一步（必備措施）
-
-1. 完成 WorldState deterministic replay + input recording/replay
-2. 實作 AbilityGraph 對 VFX/Combat 的最小橋接
-3. Story beats 驗證與 WorldDelta 產出
-4. 場景 JSON hot reload 與 shader reload pipeline
-
-更多規格細節請見 `docs/ARCH_SPEC.md`。
-
-## 🔒 Determinism Guardrails（新增）
+## 🔒 Determinism Guardrails
 - 固定 tick 計時：遊戲邏輯使用 fixed update。
-- RNG 單一入口：新增 `engine::math::DeterministicRng`（seed + streamId）。
+- RNG 單一入口：`engine::math::DeterministicRng`（seed + streamId）。
 - Input recording 為 versioned 格式（`version` + `seed` + `frames`）。
 - WorldDelta 套用加入 validation / journaling / rollback。
+- Golden hash 測試已加入（worldstate_tests）。
 
 ## 🧪 額外工具
-- `tools/validate_assets`：檢查 Ability/Story JSON 基本一致性與引用。
+- `tools/validate_assets`：檢查 Ability/Story/WorldDelta 語義錯誤。
+- `tools/replay_diff`：輸出 replay 第一個 divergence tick。
 - `scripts/check_sdl_isolation.sh`：檢查 SDL include 只存在於 platform 模組。
+- `scripts/fetch_deps.sh`：可選線上抓 third_party 依賴。
+
+更多規格細節請見 `docs/ARCH_SPEC.md`。

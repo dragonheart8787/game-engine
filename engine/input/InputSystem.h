@@ -34,6 +34,8 @@ public:
 private:
   std::unordered_map<Action, engine::core::KeyCode> bindings_;
   std::unordered_map<engine::core::KeyCode, bool> keyDown_;
+  std::unordered_map<std::int64_t, engine::core::PlatformEventType> touchState_;
+  float dragThreshold_ = 0.03f;
 };
 
 }  // namespace engine::input

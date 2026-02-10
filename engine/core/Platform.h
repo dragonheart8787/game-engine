@@ -52,6 +52,7 @@ struct PlatformEvent {
   int height = 0;
   float touchX = 0.0f;
   float touchY = 0.0f;
+  std::int64_t fingerId = -1;
 };
 
 class Platform {

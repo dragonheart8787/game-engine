@@ -164,3 +164,13 @@ Game::Render() → Renderer::EndFrame() → Platform::Present()
 - Android input stub：觸控事件映射進同一套 Action system。
 - CI 規則：SDL include isolation check。
 - 資產驗證工具：`tools/validate_assets`。
+
+## 補強項（已落地）
+- Offline-first 依賴策略：`ENGINE_VENDOR_DEPS=ON` 時不允許 FetchContent；優先 system/third_party。
+- Determinism stream policy：`WorldGen=1`, `AI=2`, `Ability=3`, `Story=4`（預留）。
+- Golden hash 測試：`tests/worldstate_tests` 比對固定 hash。
+- Journal 格式：`journal_v1.jsonl`，欄位 `seq/ts_fixedTick/seed/storyId/deltaHash/deltaOps/result/message`。
+- Journal 輪替：依最大筆數（`maxEntries`）保留最新紀錄。
+- Android 觸控 stub：touch 事件統一映射 Action system，並有 `touch_mapping.json` 配置。
+- 資產驗證工具：Ability cycle/參數/邊緣引用、Story beat 欄位、WorldDelta path/value 基本驗證。
+- Replay diff 工具：輸出第一個 divergence tick + system + streamId + delta_seq。

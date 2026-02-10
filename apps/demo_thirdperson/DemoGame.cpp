@@ -176,8 +176,13 @@ void DemoGame::updateStory() {
   if (triggerStoryA_) {
     if (directorA_.checkEntryConditions(worldState_.rawJson())) {
       engine::world::WorldDelta delta = directorA_.runBeats();
+      engine::world::WorldStore::JournalContext ctx;
+      ctx.seq = static_cast<std::uint64_t>(recording_.frames.size());
+      ctx.tsFixedTick = app_ ? app_->fixedTickCount() : 0;
+      ctx.seed = worldState_.getSeed();
+      ctx.storyId = "story_a";
       const auto result = engine::world::WorldStore::applyDeltaWithJournal(
-          worldState_, delta, "assets/scenes/world_delta_log.jsonl");
+          worldState_, delta, "assets/scenes/world_delta_log.jsonl", ctx);
       (void)result;
     }
     triggerStoryA_ = false;
@@ -185,8 +190,13 @@ void DemoGame::updateStory() {
   if (triggerStoryB_) {
     if (directorB_.checkEntryConditions(worldState_.rawJson())) {
       engine::world::WorldDelta delta = directorB_.runBeats();
+      engine::world::WorldStore::JournalContext ctx;
+      ctx.seq = static_cast<std::uint64_t>(recording_.frames.size());
+      ctx.tsFixedTick = app_ ? app_->fixedTickCount() : 0;
+      ctx.seed = worldState_.getSeed();
+      ctx.storyId = "story_b";
       const auto result = engine::world::WorldStore::applyDeltaWithJournal(
-          worldState_, delta, "assets/scenes/world_delta_log.jsonl");
+          worldState_, delta, "assets/scenes/world_delta_log.jsonl", ctx);
       (void)result;
     }
     triggerStoryB_ = false;

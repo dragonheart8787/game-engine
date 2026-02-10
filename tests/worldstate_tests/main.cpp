@@ -1,6 +1,7 @@
 #include <cassert>
 #include <filesystem>
 #include <iostream>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -67,6 +68,8 @@ int main() {
   engine::world::WorldState replayStateB = engine::world::WorldState::fromJson(replayJsonB);
   const std::uint64_t replayHashB = engine::world::WorldHasher::hash(replayStateB);
   assert(replayHashA == replayHashB);
+  const std::uint64_t goldenHash = 14709414181201912966ull;
+  assert(replayHashA == goldenHash);
 
   // Merge conflict behavior.
   engine::world::WorldDelta delta2 = engine::world::WorldDelta::fromJson(deltaJson);
@@ -84,7 +87,12 @@ int main() {
   engine::world::WorldDelta badDelta = engine::world::WorldDelta::fromJson(badDeltaJson);
   engine::world::WorldState beforeApply = engine::world::WorldState::fromJson(stateJson);
   const std::uint64_t beforeHash = engine::world::WorldHasher::hash(beforeApply);
-  const auto applyResult = engine::world::WorldStore::applyDeltaWithJournal(beforeApply, badDelta, journalPath);
+  engine::world::WorldStore::JournalContext ctx;
+  ctx.seq = 1;
+  ctx.tsFixedTick = 10;
+  ctx.seed = 42;
+  ctx.storyId = "test_story";
+  const auto applyResult = engine::world::WorldStore::applyDeltaWithJournal(beforeApply, badDelta, journalPath, ctx);
   assert(!applyResult.ok);
   assert(beforeHash == engine::world::WorldHasher::hash(beforeApply));
   assert(std::filesystem::exists(journalPath));
