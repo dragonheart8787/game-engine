@@ -32,8 +32,13 @@ struct InputFrame {
 class DemoGame {
 public:
   bool initialize(engine::core::App& app);
+  void beginFrame();
+  void handleEvents(const std::vector<engine::core::PlatformEvent>& events);
+  void beginRender();
+  void fixedUpdate(float deltaSeconds);
   void update(float deltaSeconds);
   void render();
+  void endRender();
 
 private:
   void handleInput();
@@ -51,7 +56,8 @@ private:
   engine::vfx::VfxSystem vfx_{};
 
   engine::world::WorldState worldState_;
-  engine::story::Director director_{};
+  engine::story::Director directorA_{};
+  engine::story::Director directorB_{};
   engine::story::IdentityOverride identityOverride_{};
 
   engine::math::Vec3 playerPosition_{0.0f, 0.0f, 0.0f};
@@ -61,6 +67,8 @@ private:
   std::vector<InputFrame> recordedInputs_;
   bool replaying_ = false;
   std::size_t replayIndex_ = 0;
+  bool triggerStoryA_ = false;
+  bool triggerStoryB_ = false;
 };
 
 }  // namespace apps::demo_thirdperson

@@ -16,10 +16,13 @@ const float kQuadVertices[] = {
     -0.5f, 0.0f,  0.5f,
 };
 const unsigned int kQuadIndices[] = {0, 1, 2, 2, 3, 0};
-}
+const char* kFallbackVertex = R\"(\n#version 300 es\nlayout(location = 0) in vec3 aPos;\nuniform mat4 uMvp;\nvoid main() { gl_Position = uMvp * vec4(aPos, 1.0); }\n)\";\nconst char* kFallbackFragment = R\"(\n#version 300 es\nprecision mediump float;\nuniform vec4 uColor;\nout vec4 FragColor;\nvoid main() { FragColor = uColor; }\n)\";\n}  // namespace
 
 static std::string readFile(const std::string& path) {
   std::ifstream file(path);
+  if (!file.is_open()) {
+    return {};
+  }
   std::stringstream buffer;
   buffer << file.rdbuf();
   return buffer.str();
@@ -50,6 +53,10 @@ bool Renderer::initialize() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);
   glBufferData(GL_ARRAY_BUFFER, sizeof(kQuadVertices), kQuadVertices, GL_STATIC_DRAW);
 
+  glGenBuffers(1, &ebo_);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kQuadIndices), kQuadIndices, GL_STATIC_DRAW);
+
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
@@ -78,8 +85,19 @@ void Renderer::submit(const Renderable& renderable, const engine::math::Mat4& vi
   glUniform4fv(colorLoc, 1, &renderable.color[0]);
 
   glBindVertexArray(vao_);
-  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);
+}
+
+void Renderer::submitDebug(const DebugDrawCmd& cmd, const engine::math::Mat4& viewProj) {
+  if (cmd.points.empty()) {
+    return;
+  }
+  Renderable debug;
+  debug.position = cmd.points.front();
+  debug.scale = {0.2f, 0.2f, 0.2f};
+  debug.color = cmd.color;
+  submit(debug, viewProj);
 }
 
 void Renderer::endFrame() {
@@ -95,6 +113,10 @@ void Renderer::shutdown() {
     glDeleteBuffers(1, &vbo_);
     vbo_ = 0;
   }
+  if (ebo_) {
+    glDeleteBuffers(1, &ebo_);
+    ebo_ = 0;
+  }
   if (vao_) {
     glDeleteVertexArrays(1, &vao_);
     vao_ = 0;
@@ -105,16 +127,27 @@ void Renderer::hotReload() {
   if (vertexPath_.empty() || fragmentPath_.empty()) {
     return;
   }
+  if (!std::filesystem::exists(vertexPath_) || !std::filesystem::exists(fragmentPath_)) {
+    return;
+  }
   const auto vertexTime = std::filesystem::last_write_time(vertexPath_);
   const auto fragmentTime = std::filesystem::last_write_time(fragmentPath_);
   if (vertexTime != vertexTimestamp_ || fragmentTime != fragmentTimestamp_) {
-    loadShader();
+    if (!loadShader()) {
+      // keep previous program on failure
+    }
   }
 }
 
 bool Renderer::loadShader() {
-  const std::string vertexSource = readFile(vertexPath_);
-  const std::string fragmentSource = readFile(fragmentPath_);
+  std::string vertexSource = readFile(vertexPath_);
+  std::string fragmentSource = readFile(fragmentPath_);
+  if (vertexSource.empty()) {
+    vertexSource = kFallbackVertex;
+  }
+  if (fragmentSource.empty()) {
+    fragmentSource = kFallbackFragment;
+  }
 
   const GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
   const GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
@@ -141,8 +174,12 @@ bool Renderer::loadShader() {
     glDeleteProgram(program_);
   }
   program_ = program;
-  vertexTimestamp_ = std::filesystem::last_write_time(vertexPath_);
-  fragmentTimestamp_ = std::filesystem::last_write_time(fragmentPath_);
+  if (!vertexPath_.empty() && std::filesystem::exists(vertexPath_)) {
+    vertexTimestamp_ = std::filesystem::last_write_time(vertexPath_);
+  }
+  if (!fragmentPath_.empty() && std::filesystem::exists(fragmentPath_)) {
+    fragmentTimestamp_ = std::filesystem::last_write_time(fragmentPath_);
+  }
   return true;
 }
 

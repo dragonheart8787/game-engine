@@ -1,7 +1,8 @@
 #pragma once
 
-#include <SDL.h>
 #include <unordered_map>
+
+#include "engine/core/Platform.h"
 
 namespace engine::input {
 
@@ -10,23 +11,29 @@ enum class Action {
   MoveBackward,
   MoveLeft,
   MoveRight,
+  LookLeft,
+  LookRight,
+  LookUp,
+  LookDown,
   Jump,
   Dash,
-  Ability1,
-  Ability2
+  CastAbility1,
+  TriggerStoryA,
+  TriggerStoryB,
+  ToggleDebug
 };
 
 class InputSystem {
 public:
   void initialize();
   void beginFrame();
-  void handleEvent(const SDL_Event& event);
+  void handleEvent(const engine::core::PlatformEvent& event);
 
   bool isPressed(Action action) const;
 
 private:
-  const std::uint8_t* keyboardState_ = nullptr;
-  std::unordered_map<Action, SDL_Scancode> bindings_;
+  std::unordered_map<Action, engine::core::KeyCode> bindings_;
+  std::unordered_map<engine::core::KeyCode, bool> keyDown_;
 };
 
 }  // namespace engine::input

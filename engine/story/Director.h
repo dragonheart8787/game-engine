@@ -27,14 +27,31 @@ struct StoryAsset {
   nlohmann::ordered_json worldDeltaOut;
 };
 
+enum class ControlMode {
+  Hold,
+  Guide,
+  Punch
+};
+
+struct ControlMask {
+  bool allowMove = true;
+  bool allowLook = true;
+  bool allowAbility = true;
+  bool allowUi = true;
+};
+
 class Director {
 public:
   void loadStory(const StoryAsset& asset);
   bool checkEntryConditions(const nlohmann::ordered_json& worldState) const;
-  engine::world::WorldDelta run();
+  engine::world::WorldDelta runBeats();
+  void tick(float deltaSeconds);
+  ControlMask controlMask() const { return mask_; }
 
 private:
   StoryAsset asset_;
+  ControlMask mask_{};
+  float holdTimer_ = 0.0f;
 };
 
 StoryAsset loadStoryAsset(const nlohmann::ordered_json& json);

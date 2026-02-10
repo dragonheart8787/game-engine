@@ -1,5 +1,7 @@
 #include "engine/world/WorldDelta.h"
 
+#include <algorithm>
+
 namespace engine::world {
 
 WorldDelta WorldDelta::fromJson(const nlohmann::ordered_json& json) {
@@ -22,19 +24,46 @@ nlohmann::ordered_json WorldDelta::toJson() const {
   return out;
 }
 
-void WorldDelta::apply(nlohmann::ordered_json& target) const {
+WorldDelta::ApplyResult WorldDelta::apply(nlohmann::ordered_json& target) const {
+  nlohmann::ordered_json working = target;
   for (const auto& op : ops_) {
-    const nlohmann::json::json_pointer pointer(op.path);
-    if (op.op == "set") {
-      target[pointer] = op.value;
-    } else if (op.op == "add") {
-      target[pointer].push_back(op.value);
-    } else if (op.op == "inc") {
-      target[pointer] = target.value(pointer, 0) + op.value.get<int>();
-    } else if (op.op == "remove") {
-      target.erase(pointer);
+    try {
+      const nlohmann::json::json_pointer pointer(op.path);
+      if (op.op == "set") {
+        working[pointer] = op.value;
+      } else if (op.op == "add") {
+        working[pointer].push_back(op.value);
+      } else if (op.op == "inc") {
+        working[pointer] = working.value(pointer, 0) + op.value.get<int>();
+      } else if (op.op == "remove") {
+        working.erase(pointer);
+      } else {
+        return {false, "Unknown op: " + op.op + " at " + op.path};
+      }
+    } catch (const std::exception& e) {
+      return {false, op.path + ": " + e.what()};
     }
   }
+  target = working;
+  return {true, ""};
+}
+
+bool WorldDelta::merge(const WorldDelta& other, ConflictPolicy policy) {
+  for (const auto& op : other.ops_) {
+    auto it = std::find_if(
+        ops_.begin(),
+        ops_.end(),
+        [&](const DeltaOp& existing) { return existing.path == op.path; });
+    if (it != ops_.end()) {
+      if (policy == ConflictPolicy::RejectOnConflict) {
+        return false;
+      }
+      *it = op;
+    } else {
+      ops_.push_back(op);
+    }
+  }
+  return true;
 }
 
 }  // namespace engine::world

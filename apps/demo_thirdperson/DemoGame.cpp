@@ -1,8 +1,7 @@
 #include "apps/demo_thirdperson/DemoGame.h"
 
+#include <cmath>
 #include <iostream>
-
-#include <SDL.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -30,7 +29,9 @@ bool DemoGame::initialize(engine::core::App& app) {
   abilityRuntime_.loadGraph(engine::ability::AbilityGraph::fromJson(abilityJson));
 
   const auto storyA = engine::tools::loadJson("assets/story/story_a.json");
-  director_.loadStory(engine::story::loadStoryAsset(storyA));
+  directorA_.loadStory(engine::story::loadStoryAsset(storyA));
+  const auto storyB = engine::tools::loadJson("assets/story/story_b.json");
+  directorB_.loadStory(engine::story::loadStoryAsset(storyB));
 
   engine::procgen::WorldGenerator generator;
   worldState_ = generator.generate(1337u);
@@ -38,10 +39,29 @@ bool DemoGame::initialize(engine::core::App& app) {
   return true;
 }
 
-void DemoGame::update(float deltaSeconds) {
-  handleInput();
+void DemoGame::beginFrame() {
+  input_.beginFrame();
+}
+
+void DemoGame::handleEvents(const std::vector<engine::core::PlatformEvent>& events) {
+  for (const auto& event : events) {
+    input_.handleEvent(event);
+  }
+}
+
+void DemoGame::beginRender() {
+  renderer_.beginFrame({0.1f, 0.1f, 0.12f, 1.0f});
+}
+
+void DemoGame::fixedUpdate(float deltaSeconds) {
   updateCharacter(deltaSeconds);
   abilityRuntime_.tick(deltaSeconds);
+  directorA_.tick(deltaSeconds);
+  directorB_.tick(deltaSeconds);
+}
+
+void DemoGame::update(float deltaSeconds) {
+  handleInput();
   for (const auto& event : abilityRuntime_.events()) {
     vfx_.emit(event.type);
   }
@@ -51,8 +71,6 @@ void DemoGame::update(float deltaSeconds) {
 }
 
 void DemoGame::render() {
-  renderer_.beginFrame({0.1f, 0.1f, 0.12f, 1.0f});
-
   engine::render::Renderable ground;
   ground.position = {0.0f, -0.01f, 0.0f};
   ground.scale = {10.0f, 1.0f, 10.0f};
@@ -69,17 +87,13 @@ void DemoGame::render() {
 
   renderer_.submit(ground, camera_.viewProj());
   renderer_.submit(player, camera_.viewProj());
+}
 
+void DemoGame::endRender() {
   renderer_.endFrame();
 }
 
 void DemoGame::handleInput() {
-  input_.beginFrame();
-  SDL_Event event;
-  while (SDL_PollEvent(&event)) {
-    input_.handleEvent(event);
-  }
-
   if (!replaying_) {
     recordInput();
   } else {
@@ -88,6 +102,9 @@ void DemoGame::handleInput() {
 }
 
 void DemoGame::updateCharacter(float deltaSeconds) {
+  if (!directorA_.controlMask().allowMove || !directorB_.controlMask().allowMove) {
+    return;
+  }
   const float speed = input_.isPressed(engine::input::Action::Dash) ? kDashSpeed : kMoveSpeed;
   engine::math::Vec3 move(0.0f);
 
@@ -119,19 +136,53 @@ void DemoGame::updateCharacter(float deltaSeconds) {
     onGround_ = true;
   }
 
-  if (input_.isPressed(engine::input::Action::Ability1)) {
-    abilityRuntime_.trigger("ability_basic");
+  engine::math::Vec3 direction = move;
+  const float length = std::sqrt(direction.x * direction.x + direction.y * direction.y +
+                                 direction.z * direction.z);
+  if (length > 0.0f) {
+    direction /= length;
+  }
+  abilityRuntime_.setRuntimeParams({{"direction", {direction.x, direction.y, direction.z}},
+                                    {"range", 5.0f},
+                                    {"width", 1.0f},
+                                    {"arc", 30.0f}});
+
+  if (directorA_.controlMask().allowAbility && directorB_.controlMask().allowAbility &&
+      input_.isPressed(engine::input::Action::CastAbility1)) {
+    abilityRuntime_.trigger("ability_basic", 0);
+  }
+
+  if (input_.isPressed(engine::input::Action::TriggerStoryA)) {
+    triggerStoryA_ = true;
+  }
+  if (input_.isPressed(engine::input::Action::TriggerStoryB)) {
+    triggerStoryB_ = true;
   }
 }
 
 void DemoGame::updateStory() {
-  if (!director_.checkEntryConditions(worldState_.rawJson())) {
-    return;
+  if (triggerStoryA_) {
+    if (directorA_.checkEntryConditions(worldState_.rawJson())) {
+      engine::world::WorldDelta delta = directorA_.runBeats();
+      auto json = worldState_.toJson();
+      const auto result = delta.apply(json);
+      if (result.ok) {
+        worldState_.setJson(json);
+      }
+    }
+    triggerStoryA_ = false;
   }
-  engine::world::WorldDelta delta = director_.run();
-  auto json = worldState_.toJson();
-  delta.apply(json);
-  worldState_.setJson(json);
+  if (triggerStoryB_) {
+    if (directorB_.checkEntryConditions(worldState_.rawJson())) {
+      engine::world::WorldDelta delta = directorB_.runBeats();
+      auto json = worldState_.toJson();
+      const auto result = delta.apply(json);
+      if (result.ok) {
+        worldState_.setJson(json);
+      }
+    }
+    triggerStoryB_ = false;
+  }
 }
 
 void DemoGame::recordInput() {
@@ -142,7 +193,7 @@ void DemoGame::recordInput() {
   frame.right = input_.isPressed(engine::input::Action::MoveRight);
   frame.jump = input_.isPressed(engine::input::Action::Jump);
   frame.dash = input_.isPressed(engine::input::Action::Dash);
-  frame.ability1 = input_.isPressed(engine::input::Action::Ability1);
+  frame.ability1 = input_.isPressed(engine::input::Action::CastAbility1);
   recordedInputs_.push_back(frame);
 }
 

@@ -14,8 +14,15 @@ int main(int /*argc*/, char** /*argv*/) {
     return 1;
   }
 
+  app.setBeginFrameCallback([&]() { game.beginFrame(); });
+  app.setEventCallback([&](const std::vector<engine::core::PlatformEvent>& events) {
+    game.handleEvents(events);
+  });
+  app.setBeginRenderCallback([&]() { game.beginRender(); });
+  app.setFixedUpdateCallback([&](float delta) { game.fixedUpdate(delta); });
   app.setUpdateCallback([&](float delta) { game.update(delta); });
   app.setRenderCallback([&]() { game.render(); });
+  app.setEndRenderCallback([&]() { game.endRender(); });
   app.run();
   app.shutdown();
   return 0;

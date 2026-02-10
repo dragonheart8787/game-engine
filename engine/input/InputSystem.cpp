@@ -3,28 +3,43 @@
 namespace engine::input {
 
 void InputSystem::initialize() {
-  bindings_[Action::MoveForward] = SDL_SCANCODE_W;
-  bindings_[Action::MoveBackward] = SDL_SCANCODE_S;
-  bindings_[Action::MoveLeft] = SDL_SCANCODE_A;
-  bindings_[Action::MoveRight] = SDL_SCANCODE_D;
-  bindings_[Action::Jump] = SDL_SCANCODE_SPACE;
-  bindings_[Action::Dash] = SDL_SCANCODE_LSHIFT;
-  bindings_[Action::Ability1] = SDL_SCANCODE_J;
-  bindings_[Action::Ability2] = SDL_SCANCODE_K;
+  bindings_[Action::MoveForward] = engine::core::KeyCode::W;
+  bindings_[Action::MoveBackward] = engine::core::KeyCode::S;
+  bindings_[Action::MoveLeft] = engine::core::KeyCode::A;
+  bindings_[Action::MoveRight] = engine::core::KeyCode::D;
+  bindings_[Action::LookLeft] = engine::core::KeyCode::Left;
+  bindings_[Action::LookRight] = engine::core::KeyCode::Right;
+  bindings_[Action::LookUp] = engine::core::KeyCode::Up;
+  bindings_[Action::LookDown] = engine::core::KeyCode::Down;
+  bindings_[Action::Jump] = engine::core::KeyCode::Space;
+  bindings_[Action::Dash] = engine::core::KeyCode::Shift;
+  bindings_[Action::CastAbility1] = engine::core::KeyCode::J;
+  bindings_[Action::TriggerStoryA] = engine::core::KeyCode::T;
+  bindings_[Action::TriggerStoryB] = engine::core::KeyCode::Y;
+  bindings_[Action::ToggleDebug] = engine::core::KeyCode::L;
 }
 
 void InputSystem::beginFrame() {
-  keyboardState_ = SDL_GetKeyboardState(nullptr);
 }
 
-void InputSystem::handleEvent(const SDL_Event& /*event*/) {}
+void InputSystem::handleEvent(const engine::core::PlatformEvent& event) {
+  if (event.type == engine::core::PlatformEventType::KeyDown) {
+    keyDown_[event.key] = true;
+  } else if (event.type == engine::core::PlatformEventType::KeyUp) {
+    keyDown_[event.key] = false;
+  }
+}
 
 bool InputSystem::isPressed(Action action) const {
   const auto it = bindings_.find(action);
-  if (it == bindings_.end() || !keyboardState_) {
+  if (it == bindings_.end()) {
     return false;
   }
-  return keyboardState_[it->second] != 0;
+  const auto keyIt = keyDown_.find(it->second);
+  if (keyIt == keyDown_.end()) {
+    return false;
+  }
+  return keyIt->second;
 }
 
 }  // namespace engine::input

@@ -6,7 +6,7 @@
 ## ✅ 已完成
 
 - **SDL2 + OpenGL ES 3.0** 視窗與渲染管線（PC）
-- 第三人稱 Demo：角色移動 / 跳躍 / 衝刺
+- 第三人稱 Demo：角色移動 / 跳躍 / 衝刺 / 基本 Ability 觸發
 - WorldState/WorldDelta JSON 解析與 Hash
 - AbilityGraph v0 解析 + 事件輸出
 - Story Director/Identity Override 最小 runtime
@@ -69,6 +69,18 @@ cmake --build build
 ```
 ./build/apps/demo_thirdperson/demo_thirdperson
 ```
+
+### Demo 控制
+- Move: WASD
+- Look: 方向鍵
+- Jump: Space
+- Dash: Left Shift
+- Cast Ability1: J
+- Trigger Story A/B: T / Y
+- Toggle Debug: L
+
+## 🔁 App 迴圈順序（固定）
+Platform::PollEvents → InputSystem::BeginFrame → Game::Update → Renderer::BeginFrame → Game::Render → Renderer::EndFrame → Platform::Present
 
 ## 🤖 Android (Stub)
 
