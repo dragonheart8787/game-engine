@@ -74,3 +74,5 @@ add_subdirectory(tools/validate_assets)
 add_subdirectory(tools/replay_diff)
 add_subdirectory(tests/worldstate_tests)
 add_subdirectory(tests/render_contract_tests)
+
+add_subdirectory(tests/platform_runtime_tests)

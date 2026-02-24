@@ -48,6 +48,7 @@ add_library(engine_render
   render/Renderer.cpp
   render/CameraSystem.cpp
   render/RenderAPI.cpp
+  render/RenderBackend.cpp
 )
 
 target_include_directories(engine_render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -138,6 +139,11 @@ target_link_libraries(engine_tools PUBLIC nlohmann_json::nlohmann_json)
 
 add_library(engine_platform
   platform/PlatformStubs.cpp
+  platform/PlatformServices.cpp
 )
 
 target_include_directories(engine_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+if (UNIX AND NOT APPLE)
+  target_link_libraries(engine_platform PRIVATE dl)
+endif()

@@ -1,0 +1,3 @@
+add_executable(platform_runtime_tests main.cpp)
+target_link_libraries(platform_runtime_tests PRIVATE engine_platform engine_render)
+add_test(NAME platform_runtime_tests COMMAND platform_runtime_tests)
