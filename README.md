@@ -10,7 +10,7 @@
 - WorldState/WorldDelta JSON 解析與 Hash
 - AbilityGraph v0 解析 + 事件輸出
 - Story Director/Identity Override 最小 runtime
-- 工具與測試骨架：asset_packer、validate_assets、replay_diff、worldstate_tests
+- 工具與測試骨架：asset_packer、validate_assets、replay_diff、worldstate_tests, render_contract_tests
 
 > 選擇 OpenGL ES 3.0：符合跨 PC/Android 的同一條渲染 API 要求，降低平台分歧。
 
@@ -124,3 +124,9 @@ Platform::PollEvents → InputSystem::BeginFrame → Game::Update → Renderer::
 ./scripts/perf_regression_check.py assets/config/perf_baseline.json assets/config/perf_metrics.sample.json
 ./scripts/observability_check.py assets/config/telemetry_schema.json assets/config/telemetry.sample.json
 ```
+
+
+## 🎯 Render API 心智模型與契約
+- 已加入 `engine/render/RenderAPI.h`：統一描述 RenderPass / Pipeline State / Barrier。
+- 對應 Vulkan(`VkRenderPass/Subpass/Attachment`)、D3D12(`OMSetRenderTargets/BeginRenderPass/ResourceBarrier`)、Metal(`MTLRenderPassDescriptor/PipelineState`)。
+- 測試：`render_contract_tests` 驗證契約與跨 API 映射模型。

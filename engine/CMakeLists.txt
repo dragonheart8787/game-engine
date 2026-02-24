@@ -47,6 +47,7 @@ target_link_libraries(engine_world PUBLIC nlohmann_json::nlohmann_json engine_ma
 add_library(engine_render
   render/Renderer.cpp
   render/CameraSystem.cpp
+  render/RenderAPI.cpp
 )
 
 target_include_directories(engine_render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

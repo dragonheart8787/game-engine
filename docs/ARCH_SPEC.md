@@ -181,3 +181,10 @@ Game::Render() → Renderer::EndFrame() → Platform::Present()
 - 性能回歸：`perf_regression_check.py` 以 baseline/tolerance 驗證。
 - 記憶體預算：`memory_budget_check.py` 驗證副檔名/總量 budget。
 - 觀測：`observability_check.py` 驗證 telemetry 必備欄位。
+
+## Render backend 心智模型（Vulkan / D3D12 / Metal）
+- 統一抽象：RenderPassDescription / GraphicsPipelineDescription / ResourceTransition。
+- Vulkan 對應：`VkRenderPass` + `AttachmentDescription` + `Subpass`。
+- D3D12 對應：`OMSetRenderTargets`（現行）+ `BeginRenderPass`（後續）+ `ResourceBarrier Transition`。
+- Metal 對應：`MTLRenderPassDescriptor` + `MTLRenderPipelineState` + `MTLDepthStencilState`。
+- Pipeline State 固定欄位：Shader(VS/PS/CS), Input Layout, Blend, Depth, Rasterizer, Topology, RT Format。
