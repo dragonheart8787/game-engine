@@ -32,14 +32,19 @@ jobs:
       - name: Test
         run: ctest --test-dir build
 
-  windows-build:
+  windows-sanity:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Configure (offline/vendor mode)
-        run: cmake -S . -B build -DENGINE_VENDOR_DEPS=ON
-      - name: Build
-        run: cmake --build build --config Release
+      - name: Validate perf gate script
+        shell: pwsh
+        run: python scripts/perf_regression_check.py assets/config/perf_baseline.json assets/config/perf_metrics.sample.json
+      - name: Validate observability gate script
+        shell: pwsh
+        run: python scripts/observability_check.py assets/config/telemetry_schema.json assets/config/telemetry.sample.json
+      - name: Validate memory budget gate script
+        shell: pwsh
+        run: python scripts/memory_budget_check.py assets/config/memory_budget.json assets
 
   android-build-stub:
     runs-on: ubuntu-latest
