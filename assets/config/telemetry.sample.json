@@ -1,0 +1,10 @@
+{
+  "tick": 120,
+  "fixed_step_count": 120,
+  "world_hash": 14709414181201912966,
+  "rng_stream_id": 3,
+  "delta_count": 1,
+  "story_beat": "intro",
+  "control_mask": "move:on",
+  "ability_cooldown": 0.2
+}

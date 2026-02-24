@@ -174,3 +174,10 @@ Game::Render() → Renderer::EndFrame() → Platform::Present()
 - Android 觸控 stub：touch 事件統一映射 Action system，並有 `touch_mapping.json` 配置。
 - 資產驗證工具：Ability cycle/參數/邊緣引用、Story beat 欄位、WorldDelta path/value 基本驗證。
 - Replay diff 工具：輸出第一個 divergence tick + system + streamId + delta_seq。
+
+## 交付品質 Gate（新增）
+- 資產管線：`asset_packer` 產出 deterministic manifest（sorted entries + FNV-1a）。
+- 可重現建置：`ENGINE_VENDOR_DEPS=ON` + `check_vendor_deps.sh` 必須通過。
+- 性能回歸：`perf_regression_check.py` 以 baseline/tolerance 驗證。
+- 記憶體預算：`memory_budget_check.py` 驗證副檔名/總量 budget。
+- 觀測：`observability_check.py` 驗證 telemetry 必備欄位。

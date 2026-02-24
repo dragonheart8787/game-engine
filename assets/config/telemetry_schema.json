@@ -1,0 +1,12 @@
+{
+  "required_fields": [
+    "tick",
+    "fixed_step_count",
+    "world_hash",
+    "rng_stream_id",
+    "delta_count",
+    "story_beat",
+    "control_mask",
+    "ability_cooldown"
+  ]
+}

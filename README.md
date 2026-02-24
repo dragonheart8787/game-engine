@@ -109,5 +109,18 @@ Platform::PollEvents → InputSystem::BeginFrame → Game::Update → Renderer::
 - `scripts/check_sdl_isolation.sh`：檢查 SDL include 只存在於 platform 模組。
 - `scripts/check_vendor_deps.sh`：檢查 offline 模式依賴是否完整。
 - `scripts/fetch_deps.sh`：可選線上抓 third_party 依賴。
+- `scripts/memory_budget_check.py`：資產記憶體預算 gate。
+- `scripts/perf_regression_check.py`：效能回歸 gate（baseline vs metrics）。
+- `scripts/observability_check.py`：觀測欄位完整性 gate。
 
 更多規格細節請見 `docs/ARCH_SPEC.md`。
+
+
+### 交付 gate（建議 CI 必跑）
+```bash
+./scripts/check_sdl_isolation.sh
+./scripts/check_vendor_deps.sh
+./scripts/memory_budget_check.py assets/config/memory_budget.json assets
+./scripts/perf_regression_check.py assets/config/perf_baseline.json assets/config/perf_metrics.sample.json
+./scripts/observability_check.py assets/config/telemetry_schema.json assets/config/telemetry.sample.json
+```

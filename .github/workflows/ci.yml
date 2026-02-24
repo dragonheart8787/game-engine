@@ -23,6 +23,12 @@ jobs:
         run: cmake --build build
       - name: Validate assets
         run: ./build/tools/validate_assets/validate_assets
+      - name: Memory budget gate
+        run: ./scripts/memory_budget_check.py assets/config/memory_budget.json assets
+      - name: Perf regression gate (sample)
+        run: ./scripts/perf_regression_check.py assets/config/perf_baseline.json assets/config/perf_metrics.sample.json
+      - name: Observability gate (sample)
+        run: ./scripts/observability_check.py assets/config/telemetry_schema.json assets/config/telemetry.sample.json
       - name: Test
         run: ctest --test-dir build
 
