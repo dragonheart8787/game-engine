@@ -12,6 +12,24 @@ include(FetchContent)
 find_package(glm CONFIG QUIET)
 find_package(nlohmann_json CONFIG QUIET)
 
+if (NOT TARGET glm::glm)
+  find_path(GLM_INCLUDE_DIR glm/glm.hpp)
+  if (GLM_INCLUDE_DIR)
+    add_library(glm::glm INTERFACE IMPORTED)
+    set_target_properties(glm::glm PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${GLM_INCLUDE_DIR}")
+  endif()
+endif()
+
+if (NOT TARGET nlohmann_json::nlohmann_json)
+  find_path(NLOHMANN_JSON_INCLUDE_DIR nlohmann/json.hpp)
+  if (NLOHMANN_JSON_INCLUDE_DIR)
+    add_library(nlohmann_json::nlohmann_json INTERFACE IMPORTED)
+    set_target_properties(nlohmann_json::nlohmann_json PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${NLOHMANN_JSON_INCLUDE_DIR}")
+  endif()
+endif()
+
 if (NOT glm_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/third_party/glm/CMakeLists.txt")
   add_subdirectory(third_party/glm)
 endif()
@@ -63,7 +81,11 @@ if (NOT SDL2_FOUND)
   find_package(SDL2 REQUIRED)
 endif()
 
-find_package(OpenGL REQUIRED COMPONENTS GLES3)
+find_package(OpenGL REQUIRED COMPONENTS GLES2)
+if (NOT TARGET OpenGL::GLES3)
+  add_library(OpenGL::GLES3 INTERFACE IMPORTED)
+  target_link_libraries(OpenGL::GLES3 INTERFACE OpenGL::GLES2)
+endif()
 
 enable_testing()
 
