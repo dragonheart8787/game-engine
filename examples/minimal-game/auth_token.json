@@ -1,0 +1,7 @@
+{
+  "subject": "player-1",
+  "roles": ["player"],
+  "region": "ap-southeast-1",
+  "issued_at": 100,
+  "expires_at": 200
+}
