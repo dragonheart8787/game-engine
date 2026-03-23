@@ -1,5 +1,6 @@
 """CLI entry points for validating repository contracts."""
 
+
 from __future__ import annotations
 
 import argparse
@@ -27,8 +28,8 @@ from game_engine.services.validators import validate_auth_claims
 
 
 def _cmd_info() -> None:
-    print("Pillars:", ",".join(PLATFORM_PILLARS))
-    print("Milestones:", ",".join(MVP_MILESTONES))
+
+
 
 
 def _cmd_run_demo(scene: str, frames: int, frame_time: float) -> None:
@@ -318,6 +319,7 @@ def main() -> None:
         _cmd_benchmark_run(args.project_dir, args.out_json, args.out_csv, args.win_script)
     elif args.command == "benchmark-gate":
         _cmd_benchmark_gate(args.results, args.thresholds)
+
 
 
 if __name__ == "__main__":
