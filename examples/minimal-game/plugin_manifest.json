@@ -1,0 +1,9 @@
+{
+  "name": "sample.plugin",
+  "version": "1.0.0",
+  "engine_version": "1.0.0",
+  "entrypoint": "sample.plugin:main",
+  "capabilities": ["runtime.system"],
+  "dependencies": [],
+  "permissions": ["scene.read"]
+}

@@ -1,0 +1,10 @@
+{
+  "build_id": "dev-001",
+  "platform": "linux",
+  "stack_fingerprint": "abc123",
+  "symbol_version": "sym-1",
+  "session_metadata": {
+    "region": "ap-southeast-1",
+    "match_id": "m-01"
+  }
+}

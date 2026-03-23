@@ -1,0 +1,17 @@
+{
+  "cases": {
+    "idle": {
+      "phase_input_ms": 0.05,
+      "phase_gameplay_ms": 0.1,
+      "phase_render_ms": 0.1
+    },
+    "win_path": {
+      "phase_input_ms": 0.1,
+      "phase_gameplay_ms": 0.2,
+      "phase_render_ms": 0.2
+    },
+    "scale_100": {
+      "phase_render_ms": 0.3
+    }
+  }
+}
