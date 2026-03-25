@@ -7,6 +7,10 @@ import json
 from dataclasses import asdict, dataclass
 
 from game_engine.architecture.platform import MVP_MILESTONES, PLATFORM_PILLARS
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+from game_engine.ops.observability import MetricStore, dump_metrics
+=======
+>>>>>>> integrate/all-branches
 from game_engine.pipeline.rebuild import compare_manifests
 from game_engine.pipeline.schema import BuildManifest
 
@@ -16,6 +20,10 @@ class CliReport:
     pillars: list[str]
     milestones: list[str]
     rebuild_report: dict[str, object] | None = None
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+    metrics_dump: str | None = None
+=======
+>>>>>>> integrate/all-branches
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -41,6 +49,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--old-commit", default="old")
     parser.add_argument("--new-commit", default="new")
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+    parser.add_argument(
+        "--dump-metrics",
+        action="store_true",
+        help="Emit a JSON metrics snapshot for observability wiring checks.",
+    )
+=======
+>>>>>>> integrate/all-branches
     return parser
 
 
@@ -55,6 +71,11 @@ def render_report(report: CliReport, output_format: str) -> str:
     if report.rebuild_report is not None:
         lines.append(f"Rebuild added hashes: {','.join(report.rebuild_report['added_hashes'])}")
         lines.append(f"Rebuild removed hashes: {','.join(report.rebuild_report['removed_hashes'])}")
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+    if report.metrics_dump is not None:
+        lines.append(f"Metrics: {report.metrics_dump}")
+=======
+>>>>>>> integrate/all-branches
     return "\n".join(lines)
 
 
@@ -79,10 +100,25 @@ def main(argv: list[str] | None = None) -> int:
         )
         rebuild_report = asdict(compare_manifests(old, new))
 
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+    metrics_dump: str | None = None
+    if args.dump_metrics:
+        metrics = MetricStore()
+        metrics.inc("cli.invocations")
+        metrics.set_gauge("cli.rebuild_hash_count", float(len(old_hashes) + len(new_hashes)))
+        metrics.emit("cli.report_generated", format=args.format)
+        metrics_dump = dump_metrics(metrics)
+
+=======
+>>>>>>> integrate/all-branches
     report = CliReport(
         pillars=list(PLATFORM_PILLARS),
         milestones=list(MVP_MILESTONES),
         rebuild_report=rebuild_report,
+<<<<<<< codex/implement-foundational-runtime-features-vfq4v9
+        metrics_dump=metrics_dump,
+=======
+>>>>>>> integrate/all-branches
     )
     print(render_report(report, args.format))
     return 0
