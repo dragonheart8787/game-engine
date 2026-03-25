@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-md_count=$(rg --files -g '*.md' | wc -l)
-if [[ "$md_count" -gt 1 ]]; then
-  echo "Too many markdown files left: $md_count (expected only README.md)"
+
+if [[ ! -f README.md ]]; then
+  echo "README.md is required"
   exit 1
 fi
-echo "Markdown-to-code migration check passed"
+
+if [[ ! -s README.md ]]; then
+  echo "README.md must not be empty"
+  exit 1
+fi
+
+if ! grep -Eq '^# ' README.md; then
+  echo "README.md must contain a top-level heading"
+  exit 1
+fi
+
+echo "README structure looks good"
