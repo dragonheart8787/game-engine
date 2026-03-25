@@ -11,7 +11,7 @@ if [[ ! -s README.md ]]; then
   exit 1
 fi
 
-if ! grep -Eq '^# ' README.md; then
+if ! grep -qE '^# ' README.md; then
   echo "README.md must contain a top-level heading"
   exit 1
 fi

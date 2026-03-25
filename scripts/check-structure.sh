@@ -19,6 +19,7 @@ required_cpp=(
   "apps/smoke/main.cpp"
   "tools/README.md"
   "assets/.keep"
+  "scripts/build_android_stub.sh"
   "scripts/check_sdl_isolation.sh"
 )
 

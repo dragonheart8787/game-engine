@@ -26,7 +26,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e . pytest
+          python -m pip install pytest
       - name: Run pytest
         run: pytest
 
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake (Windows)
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build C++ lane (Windows)
         run: cmake --build build --config Release
 
@@ -55,6 +55,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Android stub script
-        run: |
-          chmod +x scripts/build_android_stub.sh
-          bash scripts/build_android_stub.sh
+        run: bash scripts/build_android_stub.sh
