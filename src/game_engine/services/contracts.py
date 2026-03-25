@@ -1,6 +1,7 @@
 """Online service contracts."""
 
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -17,3 +18,16 @@ class LobbyTicket:
     lobby_id: str
     player_id: str
     queue_name: str
+
+
+@dataclass(slots=True)
+class ReplicationSnapshot:
+    node_id: str
+    state: dict[str, Any]
+
+
+@dataclass(slots=True)
+class ServiceHealth:
+    service_name: str
+    status: str
+    details: str = ""
