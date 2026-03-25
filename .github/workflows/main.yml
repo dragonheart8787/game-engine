@@ -1,4 +1,10 @@
-git checkout main
-git pull origin main
-git checkout -b integrate/all-branches
-git push -u origin integrate/all-branches
+name: main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Use .github/workflows/ci.yml for integration checks"
