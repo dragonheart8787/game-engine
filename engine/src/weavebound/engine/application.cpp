@@ -22,6 +22,12 @@ bool Application::startup(const ApplicationConfig& cfg) {
   window_ = platform::create_stub_window(wd);
 #endif
 
+  if (window_) {
+    for (int i = 0; i < 64; ++i) {
+      window_->pump_events();
+    }
+  }
+
   clock_ = platform::create_std_clock();
   last_elapsed_ = clock_->elapsed_seconds();
 
@@ -34,6 +40,12 @@ bool Application::startup(const ApplicationConfig& cfg) {
     device_ = rhi::create_device(dd);
   } else {
     device_.reset();
+  }
+
+  if (window_) {
+    for (int i = 0; i < 64; ++i) {
+      window_->pump_events();
+    }
   }
 
   started_ = window_ != nullptr;

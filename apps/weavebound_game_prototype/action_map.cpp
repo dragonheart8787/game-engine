@@ -36,7 +36,6 @@ GameplayActions build_gameplay_actions(const InputState& cur, const InputState& 
     a.move_y = my / len;
   }
   const bool move_nonzero = len > 1e-5f;
-  // Win32 視窗將 Escape 用於關閉視窗；暫停用 P（對齊原型 HUD）。
   a.pause_pressed = edge_down(cur, prev, Key::P);
   a.confirm_pressed = edge_down(cur, prev, Key::Space);
   a.dash_pressed = edge_down(cur, prev, Key::Shift) && move_nonzero;

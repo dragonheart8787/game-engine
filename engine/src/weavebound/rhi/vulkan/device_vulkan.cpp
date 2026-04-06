@@ -952,21 +952,29 @@ bool VulkanDevice::clear_present_rgba(float r, float g, float b, float a,
 
   const int fi = frame_index_;
   vkWaitForFences(device_, 1, &fences_[fi], VK_TRUE, UINT64_MAX);
-  vkResetFences(device_, 1, &fences_[fi]);
 
   uint32_t image_index = 0;
-  VkResult ar = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX, sem_image_available_[fi], VK_NULL_HANDLE,
-                                      &image_index);
+  constexpr std::uint64_t kAcquireTimeoutNs = 1'500'000'000ULL;
+  VkResult ar = vkAcquireNextImageKHR(device_, swapchain_, kAcquireTimeoutNs, sem_image_available_[fi],
+                                      VK_NULL_HANDLE, &image_index);
+  if (ar == VK_TIMEOUT || ar == VK_NOT_READY) {
+    return false;
+  }
   if (ar == VK_ERROR_OUT_OF_DATE_KHR) {
     if (!try_rebuild_swapchain_if_needed()) {
       return false;
     }
-    ar = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX, sem_image_available_[fi], VK_NULL_HANDLE,
+    ar = vkAcquireNextImageKHR(device_, swapchain_, kAcquireTimeoutNs, sem_image_available_[fi], VK_NULL_HANDLE,
                                &image_index);
+    if (ar == VK_TIMEOUT || ar == VK_NOT_READY) {
+      return false;
+    }
   }
   if (ar != VK_SUCCESS && ar != VK_SUBOPTIMAL_KHR) {
     return false;
   }
+
+  vkResetFences(device_, 1, &fences_[fi]);
 
   VkCommandBuffer cmd = cmd_bufs_[fi];
   vkResetCommandBuffer(cmd, 0);
@@ -1121,7 +1129,7 @@ bool VulkanDevice::try_rebuild_swapchain_if_needed() {
   const int w = window_->width();
   const int h = window_->height();
   if (w <= 0 || h <= 0) {
-    return true;
+    return false;
   }
   const uint32_t nw = static_cast<uint32_t>(w);
   const uint32_t nh = static_cast<uint32_t>(h);

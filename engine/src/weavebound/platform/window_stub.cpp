@@ -27,6 +27,12 @@ class WindowStub final : public IWindow {
 
   void read_input(InputState& out) override { out = InputState{}; }
 
+  void request_close() override { open_ = false; }
+
+  void set_client_overlay_utf8(const std::string&) override {}
+
+  void set_client_minimap(const ClientMinimapFrame*) override {}
+
  private:
   WindowDesc desc_;
   bool open_{true};

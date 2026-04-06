@@ -21,6 +21,7 @@ enum class Key : std::uint32_t {
   Shift,
   E,
   C,
+  Q,
   Count
 };
 

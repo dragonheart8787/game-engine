@@ -108,6 +108,8 @@ class PlaySession {
   void debug_spawn_enemy_at(float x, float y, float hp = 50.f);
 
   std::string hud_line() const;
+  /** `--play` 標題列：精簡 UTF-8（含中文目標），供 `SetWindowTextW` 正確顯示。 */
+  std::string title_bar_hud_utf8() const;
   const std::vector<EnemyActor>& enemies() const { return enemies_; }
   const std::vector<Projectile>& projectiles() const { return projectiles_; }
   float goal_x() const { return goal_x_; }

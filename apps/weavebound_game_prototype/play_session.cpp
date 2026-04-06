@@ -13,6 +13,18 @@ constexpr std::uint32_t kScrapPerKill = 3u;
 constexpr std::uint32_t kScrapSpendCost = 5u;
 constexpr float kFocusRestorePerSpend = 15.f;
 constexpr std::uint32_t kScrapMaxStored = 999999u;
+
+/** 截斷 UTF-8，避免切在中文字節中間。 */
+std::string utf8_prefix(const std::string& s, std::size_t max_bytes) {
+  if (s.size() <= max_bytes) {
+    return s;
+  }
+  std::size_t n = max_bytes;
+  while (n > 0 && (static_cast<unsigned char>(s[n - 1]) & 0xC0) == 0x80) {
+    --n;
+  }
+  return s.substr(0, n) + "...";
+}
 }  // namespace
 
 void PlaySession::configure_abilities(const AbilitySliceRuntime& spec) {
@@ -470,6 +482,18 @@ std::string PlaySession::hud_line() const {
   os << " | ";
   os << objective_line();
   os << " WASD E技 Shift衝 C碎片換Focus P pause Space ack";
+  return os.str();
+}
+
+std::string PlaySession::title_bar_hud_utf8() const {
+  std::ostringstream os;
+  os << "HP" << static_cast<int>(health_) << " F" << static_cast<int>(focus_) << "/"
+     << static_cast<int>(spec_.focus_max) << " S" << scrap_;
+  if (multi_stage_) {
+    os << " L" << (campaign_stage_ + 1) << "/3";
+  }
+  os << " | " << utf8_prefix(objective_line(), 48);
+  os << " | WASD E Shift C P Esc";
   return os.str();
 }
 

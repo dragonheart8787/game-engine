@@ -113,7 +113,7 @@ int main() {
       }
     }
     std::cout << "clear_present loop max_frames=" << max_frames
-              << " (set WEAVEBOUND_SMOKE_FRAMES, ESC closes)…\n";
+              << " (set WEAVEBOUND_SMOKE_FRAMES; close window to exit early)…\n";
     int frame = 0;
     while (frame < max_frames) {
       float dt = 0.f;

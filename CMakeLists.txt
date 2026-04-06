@@ -469,12 +469,27 @@ set_tests_properties(engine_smoke PROPERTIES
 add_executable(weavebound_header_smoke engine/tests/header_smoke.cpp)
 target_link_libraries(weavebound_header_smoke PRIVATE game_engine_core)
 add_test(NAME weavebound_save_game_v0_smoke COMMAND weavebound_save_game_v0_smoke)
-add_test(NAME weavebound_game_prototype COMMAND weavebound_game_prototype)
-add_test(NAME weavebound_game_prototype_gameover COMMAND weavebound_game_prototype --ci-gameover)
-add_test(NAME weavebound_game_prototype_ability_smoke COMMAND weavebound_game_prototype --ability-smoke)
-add_test(NAME weavebound_game_prototype_settings_smoke COMMAND weavebound_game_prototype --settings-smoke)
-add_test(NAME weavebound_game_prototype_m1_flow_smoke COMMAND weavebound_game_prototype --m1-flow-smoke)
-add_test(NAME weavebound_game_prototype_economy_smoke COMMAND weavebound_game_prototype --economy-smoke)
+# 工作目錄設為 exe 目錄，才能載入旁邊的 ability_slice_v0.json / level_m1.json / shaders（CTest 預設 cwd 常為 build 根目錄）
+add_test(NAME weavebound_game_prototype
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>")
+add_test(NAME weavebound_game_prototype_gameover
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>" --ci-gameover)
+add_test(NAME weavebound_game_prototype_ability_smoke
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>" --ability-smoke)
+add_test(NAME weavebound_game_prototype_settings_smoke
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>" --settings-smoke)
+add_test(NAME weavebound_game_prototype_m1_flow_smoke
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>" --m1-flow-smoke)
+add_test(NAME weavebound_game_prototype_economy_smoke
+  COMMAND ${CMAKE_COMMAND} -E chdir "$<TARGET_FILE_DIR:weavebound_game_prototype>"
+          "$<TARGET_FILE:weavebound_game_prototype>" --economy-smoke)
+set_tests_properties(weavebound_game_prototype weavebound_game_prototype_gameover
+  PROPERTIES ENVIRONMENT "WEAVEBOUND_SMOKE_FRAMES=0")
 
 add_test(NAME weavebound_header_smoke COMMAND weavebound_header_smoke)
 
@@ -523,4 +538,13 @@ if(WB_HAS_VULKAN)
   add_executable(weavebound_rhi_smoke apps/rhi_smoke/main.cpp)
   target_link_libraries(weavebound_rhi_smoke PRIVATE game_engine_core)
   add_test(NAME weavebound_rhi_smoke COMMAND weavebound_rhi_smoke)
+endif()
+
+# 與同層 eidrix_mvp 整合：手動目標（不納入預設 ALL），需已安裝 pytest
+find_program(WB_PYTHON NAMES python3 python)
+if(WB_PYTHON AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../eidrix_mvp/tests")
+  add_custom_target(eidrix_pytest
+    COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_CURRENT_SOURCE_DIR}/../eidrix_mvp"
+            ${WB_PYTHON} -m pytest tests/ -q
+    COMMENT "Eidrix pytest（目錄：../eidrix_mvp）")
 endif()
