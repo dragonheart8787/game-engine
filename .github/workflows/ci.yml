@@ -30,10 +30,21 @@ jobs:
       - name: Run pytest
         run: pytest
 
+      - name: Eidrix pytest (monorepo sibling)
+        working-directory: ${{ github.workspace }}/..
+        run: |
+          if [ -d eidrix_mvp/tests ]; then
+            (cd eidrix_mvp && python -m pytest tests/ -q)
+          else
+            echo "No eidrix_mvp/tests in parent — skip (game-engine-only clone)."
+          fi
+
   cpp-build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Vulkan dev headers (matrix prep / future Linux RHI)
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev
       - name: Configure CMake
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build C++ lane
@@ -45,10 +56,17 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Vulkan SDK
+        uses: humbletim/install-vulkan-sdk@v1.1.1
+        with:
+          version: latest
+          cache: true
       - name: Configure CMake (Windows)
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build C++ lane (Windows)
         run: cmake --build build --config Release
+      - name: Run ctest (Windows)
+        run: ctest --test-dir build -C Release --output-on-failure
 
   android-stub:
     runs-on: ubuntu-latest

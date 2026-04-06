@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "schema_version": "ability_slice_v0",
+    "id": "slice_default",
+    "focus_max": 100.0
+  },
+  "dash": {
+    "cooldown_s": 1.2,
+    "duration_s": 0.18,
+    "speed_mult": 3.5,
+    "iframes_s": 0.15
+  },
+  "primary": {
+    "shape": "wedge",
+    "range": 3.5,
+    "half_angle_deg": 55.0,
+    "windup_s": 0.12,
+    "active_s": 0.08,
+    "damage": 28.0
+  },
+  "cost": {
+    "resource": "focus",
+    "amount": 39
+  },
+  "rules": [
+    {
+      "op": "can_use",
+      "target": "primary"
+    },
+    {
+      "op": "spend",
+      "target": "primary"
+    },
+    {
+      "op": "spawn_hitbox",
+      "target": "primary"
+    },
+    {
+      "op": "dash_iframe",
+      "target": "dash"
+    }
+  ]
+}

@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+tools/third_party/*.exe
+tools/third_party/*.msi
+
+# Local build / cook artifacts
+build/
+cook_out/
+*.egg-info/

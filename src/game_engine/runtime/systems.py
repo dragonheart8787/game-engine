@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .ecs import SystemRegistry
+
 
 @dataclass(slots=True)
 class PhysicsBody:
@@ -63,3 +65,12 @@ def ui_system(_: float, world: dict[str, object]) -> None:
     if ui.dirty:
         ui.layout_passes += 1
         ui.dirty = False
+
+
+def register_standard_systems(registry: SystemRegistry) -> None:
+    """Register built-in simulation systems in a stable order."""
+
+    registry.register("physics", physics_system)
+    registry.register("animation", animation_system)
+    registry.register("audio", audio_system)
+    registry.register("ui", ui_system)

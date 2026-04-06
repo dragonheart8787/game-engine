@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Executable scaffold for a production-oriented game engine platform"
 requires-python = ">=3.11"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = "-q"

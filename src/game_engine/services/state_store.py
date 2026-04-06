@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from threading import RLock
 from typing import Any
@@ -49,3 +50,16 @@ class StateStore:
     def snapshot(self) -> dict[str, StateRecord]:
         with self._lock:
             return dict(self._items)
+
+    def put_many(self, items: Mapping[str, Any]) -> dict[str, StateRecord]:
+        """Batch version of put under a single lock (useful for HUD / telemetry sync)."""
+
+        with self._lock:
+            out: dict[str, StateRecord] = {}
+            for key, value in items.items():
+                current = self._items.get(key)
+                version = 1 if current is None else current.version + 1
+                record = StateRecord(key=key, value=value, version=version)
+                self._items[key] = record
+                out[key] = record
+            return out
